@@ -125,15 +125,15 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
 
 ## PHASE 5 — Event System
 
-- [ ] **T5.1** `EventForm` shared component (create + edit modes).
+- [x] **T5.1** `EventForm` shared component (create + edit modes).
   Dependencies: Phase 2, Phase 4.
-- [ ] **T5.2** Create Event page (`/dashboard/create-event`) using `EventForm`, sets `organizer_id` server-side.
+- [x] **T5.2** Create Event page (`/dashboard/create-event`) using `EventForm`, sets `organizer_id` server-side.
   Dependencies: T5.1.
-- [ ] **T5.3** Manage Events page (`/dashboard/manage-events`) — list own events, edit/delete actions.
+- [x] **T5.3** Manage Events page (`/dashboard/manage-events`) — list own events, edit/delete actions.
   Dependencies: T5.1.
-- [ ] **T5.4** Edit Event page (`/dashboard/manage-events/[id]/edit`) — pre-filled `EventForm`, RLS-protected update.
+- [x] **T5.4** Edit Event page (`/dashboard/manage-events/[id]/edit`) — pre-filled `EventForm`, RLS-protected update.
   Dependencies: T5.1, T5.3.
-- [ ] **T5.5** Delete Event flow — confirm dialog, cascades registrations, RLS-protected.
+- [x] **T5.5** Delete Event flow — confirm dialog, cascades registrations, RLS-protected.
   Dependencies: T5.3.
   Acceptance for phase: A user can create, edit, and delete only their own events; attempting to access another user's edit URL directly is rejected by RLS (verified, not assumed).
 

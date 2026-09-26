@@ -55,8 +55,8 @@ _(Antigravity: append a dated entry here at the end of each completed phase.)_
 - `[x]` Phase 2 — Design System — completed 2026-09-26. Design tokens and glassmorphism utilities implemented in globals.css, responsive Navbar with auth session listener and mobile menu, 4-column Footer, EventCard with seat availability and category badges, EventCardSkeleton, EmptyState, and shadcn primitives (Button, Input, Textarea, Select, Avatar, Dialog, Tabs, Toaster).
 - `[x]` Phase 3 — Public Pages — completed 2026-09-26. Home page (/), Events discovery page (/events) with keyword search, category pills, and sort order, Event detail page (/events/[id]) with live registrations join and RegisterButton, Categories directory (/categories), About page (/about), and Contact page (/contact) with zod validation and Supabase inserts.
 - `[x]` Phase 4 — Authentication — completed 2026-09-26. Signup (/signup) with Zod validation and auto-login, Login (/login) supporting ?redirect=, Logout action in navbar and sidebar, middleware session refresh and route protection for /dashboard/*, Dashboard layout and sidebar, Dashboard Overview (/dashboard) with stat cards and upcoming RSVPs, and Profile edit (/dashboard/profile).
-- `[ ]` Phase 5 — Event System — in progress
-- `[ ]` Phase 6 — Registration System — not started
+- `[x]` Phase 5 — Event System — completed 2026-09-26. Event validation schema with Zod 4, reusable EventForm with live preview card and Unsplash presets, /dashboard/create-event, /dashboard/manage-events with search, status filters, attendee capacity meter, and delete confirmation dialog, /dashboard/manage-events/[id]/edit with strict organizer RLS verification, AttendeeRosterDialog with attendee profile avatars, and live verified RLS security checks against cross-user edits/deletions.
+- `[ ]` Phase 6 — Registration System — in progress
 - `[ ]` Phase 7 — Dashboard — not started
 - `[ ]` Phase 8 — Polish — not started
 - `[ ]` Phase 9 — Deployment — not started
@@ -64,7 +64,7 @@ _(Antigravity: append a dated entry here at the end of each completed phase.)_
 
 ## 8. Current Status
 
-Phases 0 through 4 completed cleanly. Phase 5 (Event System: EventForm, create-event, manage-events, edit-event, and delete-event with RLS enforcement) is now underway.
+Phases 0 through 5 completed cleanly and verified. Phase 6 (Registration System: RegisterButton state machine, capacity trigger enforcement, soft-cancel/re-register upsert, and /dashboard/events for attendee RSVPs) is now underway.
 
 ## 9. Important Constraints
 
