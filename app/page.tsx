@@ -3,9 +3,43 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Users, Sparkles, ArrowRight, ShieldCheck } from "lucide-react"
+import { createClient } from "@/lib/supabase/server"
+import {
+  Calendar,
+  MapPin,
+  Users,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Laptop,
+  Briefcase,
+  GraduationCap,
+  Wrench,
+  Film,
+  Trophy,
+  Heart,
+  HelpCircle,
+} from "lucide-react"
 
-export default function Home() {
+// Icon resolver for dynamic categories
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Laptop,
+  Briefcase,
+  GraduationCap,
+  Users,
+  Wrench,
+  Film,
+  Trophy,
+  Heart,
+}
+
+export default async function Home() {
+  const supabase = await createClient()
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("*")
+    .order("name")
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navbar Minimal Preview */}
@@ -20,7 +54,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Badge variant="success" className="hidden sm:inline-flex gap-1.5 py-1">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Phase 0 Ready</span>
+              <span>Database Connected</span>
             </Badge>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/login">Sign in</Link>
@@ -65,8 +99,36 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Live Seeded Categories Preview from Supabase */}
+        {categories && categories.length > 0 && (
+          <div className="max-w-5xl mx-auto w-full mt-12">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Explore Categories (Live from Supabase)
+              </span>
+              <span className="text-xs text-primary font-medium">{categories.length} Categories</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+              {categories.map((category) => {
+                const IconComponent = (category.icon && iconMap[category.icon]) || HelpCircle
+                return (
+                  <div
+                    key={category.id}
+                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-surface border border-border shadow-soft hover:border-primary/40 hover:shadow-medium transition-all duration-150 text-center group cursor-pointer"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                      <IconComponent className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-medium text-foreground line-clamp-1">{category.name}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Design System Preview Grid */}
-        <div className="max-w-5xl mx-auto w-full mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="max-w-5xl mx-auto w-full mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1: Sample Event Card */}
           <Card className="hover:shadow-medium transition-all duration-200">
             <div className="h-44 w-full bg-gradient-to-br from-primary/20 via-accent/20 to-surface-muted rounded-t-2xl relative p-4 flex items-end">
@@ -114,7 +176,7 @@ export default function Home() {
                   <span className="w-1.5 h-1.5 rounded-full bg-primary" /> Next.js 16 (App Router + Turbopack)
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Supabase Postgres + RLS Policies
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Supabase Postgres (5 tables + RLS)
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Automated GitHub & Vercel Sync
@@ -122,7 +184,7 @@ export default function Home() {
               </ul>
             </div>
             <div className="pt-4 border-t border-glass-border">
-              <span className="text-xs font-medium text-muted-foreground">Status: Ready for Phase 1</span>
+              <span className="text-xs font-medium text-muted-foreground">Status: Phase 1 Complete</span>
             </div>
           </div>
 

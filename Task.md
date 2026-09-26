@@ -47,27 +47,27 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
 
 ## PHASE 1 — Architecture & Database
 
-- [ ] **T1.1** Write and run migration `0001_init_schema.sql` (tables, constraints, indexes, triggers) per Architecture.md §5.2.
+- [x] **T1.1** Write and run migration `0001_init_schema.sql` (tables, constraints, indexes, triggers) per Architecture.md §5.2.
   Dependencies: T0.4.
   Acceptance: All 5 tables exist in Supabase; `select 1 from information_schema.tables` confirms.
 
-- [ ] **T1.2** Write and run migration `0002_rls_policies.sql` (enable RLS + all policies) per Architecture.md §5.4.
+- [x] **T1.2** Write and run migration `0002_rls_policies.sql` (enable RLS + all policies) per Architecture.md §5.4.
   Dependencies: T1.1.
   Acceptance: Querying `events` with the anon key and no session returns only `published` rows; inserting an event without a valid session is rejected.
 
-- [ ] **T1.3** Write and run seed migration `0003_seed_categories.sql` with the 8 categories (Technology, Business, Education, Networking, Workshops, Entertainment, Sports, Community).
+- [x] **T1.3** Write and run seed migration `0003_seed_categories.sql` with the 8 categories (Technology, Business, Education, Networking, Workshops, Entertainment, Sports, Community).
   Dependencies: T1.1.
   Acceptance: `select count(*) from categories` = 8.
 
-- [ ] **T1.4** Generate TypeScript types from the live schema (`supabase gen types typescript`) into `types/database.types.ts`.
+- [x] **T1.4** Generate TypeScript types from the live schema (`supabase gen types typescript`) into `types/database.types.ts`.
   Dependencies: T1.1.
   Acceptance: Typed `Database` type importable and used by both Supabase clients.
 
-- [ ] **T1.5** Verify basic read/write against Supabase from a throwaway script or a scratch page (insert a test profile-linked event, read it back, delete it).
+- [x] **T1.5** Verify basic read/write against Supabase from a throwaway script or a scratch page (insert a test profile-linked event, read it back, delete it).
   Dependencies: T1.1, T1.2.
   Acceptance: Round-trip succeeds; scratch code removed after verification.
 
-- [ ] **T1.6** Build `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/middleware.ts`.
+- [x] **T1.6** Build `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/middleware.ts`.
   Dependencies: T1.4.
   Acceptance: Both clients compile and successfully fetch `categories` in a test render.
 
