@@ -52,8 +52,8 @@ _(Antigravity: append a dated entry here at the end of each completed phase.)_
 
 - `[x]` Phase 0 — Connection & Foundation — completed 2026-09-26. Next.js 16 (App Router + Turbopack + Tailwind v4), Supabase project connected via MCP and .env.local, Git repository initialized and connected to GitHub (sanahafeez558-prog/eventify), shadcn/ui components (Button, Card, Badge, Toaster) and folder structure in place.
 - `[x]` Phase 1 — Architecture & Database — completed 2026-09-26. All 5 tables created in Supabase (profiles, categories, events, registrations, contact_messages), triggers set up (updated_at, handle_new_user, enforce_event_capacity), RLS enabled with strict owner/public policies, 8 categories seeded, TypeScript types generated in types/database.types.ts, and verified live against Supabase.
-- `[ ]` Phase 2 — Design System — in progress
-- `[ ]` Phase 3 — Public Pages — not started
+- `[x]` Phase 2 — Design System — completed 2026-09-26. Design tokens and glassmorphism utilities implemented in globals.css, responsive Navbar with auth session listener and mobile menu, 4-column Footer, EventCard with seat availability and category badges, EventCardSkeleton, EmptyState, and shadcn primitives (Button, Input, Textarea, Select, Avatar, Dialog, Tabs, Toaster).
+- `[ ]` Phase 3 — Public Pages — in progress
 - `[ ]` Phase 4 — Authentication — not started
 - `[ ]` Phase 5 — Event System — not started
 - `[ ]` Phase 6 — Registration System — not started
@@ -64,7 +64,7 @@ _(Antigravity: append a dated entry here at the end of each completed phase.)_
 
 ## 8. Current Status
 
-Phase 0 and Phase 1 completed cleanly. Phase 2 (Design System & Navigation Layout) is underway.
+Phases 0, 1, and 2 completed cleanly. Phase 3 (Public Pages: /events, /events/[id], /categories, /about, /contact) is underway.
 
 ## 9. Important Constraints
 

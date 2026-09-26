@@ -1,5 +1,6 @@
-import Image from "next/image"
 import Link from "next/link"
+import { Navbar } from "@/components/layout/navbar"
+import { Footer } from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -42,29 +43,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Navbar Minimal Preview */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-border/80">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <Image src="/logo.svg" alt="Eventify Logo" width={32} height={32} className="transition-transform group-hover:scale-105" />
-            <span className="font-bold text-xl tracking-tight text-foreground">
-              Event<span className="text-primary">ify</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Badge variant="success" className="hidden sm:inline-flex gap-1.5 py-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Database Connected</span>
-            </Badge>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Sign in</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/signup">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-16 md:py-24 relative overflow-hidden">
@@ -89,12 +68,14 @@ export default async function Home() {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <Button size="lg" className="shadow-medium gap-2">
-              Browse Events
-              <ArrowRight className="w-4 h-4" />
+            <Button size="lg" className="shadow-medium gap-2" asChild>
+              <Link href="/events">
+                Browse Events
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </Button>
-            <Button variant="outline" size="lg">
-              Create an Event
+            <Button variant="outline" size="lg" asChild>
+              <Link href="/dashboard/create-event">Create an Event</Link>
             </Button>
           </div>
         </div>
@@ -112,15 +93,16 @@ export default async function Home() {
               {categories.map((category) => {
                 const IconComponent = (category.icon && iconMap[category.icon]) || HelpCircle
                 return (
-                  <div
+                  <Link
                     key={category.id}
+                    href={`/events?category=${encodeURIComponent(category.name)}`}
                     className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-surface border border-border shadow-soft hover:border-primary/40 hover:shadow-medium transition-all duration-150 text-center group cursor-pointer"
                   >
                     <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                       <IconComponent className="w-4 h-4" />
                     </div>
                     <span className="text-xs font-medium text-foreground line-clamp-1">{category.name}</span>
-                  </div>
+                  </Link>
                 )
               })}
             </div>
@@ -157,8 +139,8 @@ export default async function Home() {
                 <Users className="w-3.5 h-3.5" />
                 <span>38 / 50 seats left</span>
               </div>
-              <Button size="sm" variant="secondary">
-                View Event
+              <Button size="sm" variant="secondary" asChild>
+                <Link href="/events">View Event</Link>
               </Button>
             </CardFooter>
           </Card>
@@ -184,7 +166,7 @@ export default async function Home() {
               </ul>
             </div>
             <div className="pt-4 border-t border-glass-border">
-              <span className="text-xs font-medium text-muted-foreground">Status: Phase 1 Complete</span>
+              <span className="text-xs font-medium text-muted-foreground">Status: Phase 2 In Progress</span>
             </div>
           </div>
 
@@ -220,10 +202,7 @@ export default async function Home() {
         </div>
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="border-t border-border/70 py-8 px-4 text-center text-xs text-muted-foreground bg-surface-muted">
-        <p>© 2026 Eventify. Built for BS IT Web Engineering capstone.</p>
-      </footer>
+      <Footer />
     </div>
   )
 }

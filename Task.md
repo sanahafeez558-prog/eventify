@@ -75,15 +75,15 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
 
 ## PHASE 2 — Design System
 
-- [ ] **T2.1** Configure Tailwind theme tokens (colors, radius, shadows) per Design.md.
+- [x] **T2.1** Configure Tailwind theme tokens (colors, radius, shadows) per Design.md.
   Dependencies: T0.6.
-- [ ] **T2.2** Build base typography styles (headings, body, font imports).
+- [x] **T2.2** Build base typography styles (headings, body, font imports).
   Dependencies: T2.1.
-- [ ] **T2.3** Build/verify shadcn components needed: Button, Input, Textarea, Select, Card, Badge, Dialog, Sheet, Toast/Sonner, Skeleton, Avatar, Tabs.
+- [x] **T2.3** Build/verify shadcn components needed: Button, Input, Textarea, Select, Card, Badge, Dialog, Sheet, Toast/Sonner, Skeleton, Avatar, Tabs.
   Dependencies: T0.6.
-- [ ] **T2.4** Build glass card + glass surface utility classes.
+- [x] **T2.4** Build glass card + glass surface utility classes.
   Dependencies: T2.1.
-- [ ] **T2.5** Build `Navbar` (desktop + mobile sheet) and `Footer`.
+- [x] **T2.5** Build `Navbar` (desktop + mobile sheet) and `Footer`.
   Dependencies: T2.1–T2.4.
   Acceptance for phase: A scratch page demonstrates every component from Design.md rendering correctly, light theme, responsive.
 
