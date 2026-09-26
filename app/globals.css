@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+:root {
+  /* Base surfaces */
+  --background: 210 40% 98%;
+  --surface: 0 0% 100%;
+  --surface-muted: 210 30% 96%;
+  --border: 214 32% 91%;
+
+  /* Text */
+  --foreground: 222 30% 14%;
+  --muted-foreground: 215 16% 45%;
+
+  /* Brand accents */
+  --primary: 221 83% 63%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 262 72% 68%;
+  --accent-foreground: 0 0% 100%;
+
+  /* Semantic */
+  --success: 152 58% 45%;
+  --warning: 38 92% 58%;
+  --destructive: 0 72% 58%;
+
+  /* Glass */
+  --glass-bg: 0 0% 100% / 0.65;
+  --glass-border: 0 0% 100% / 0.45;
+
+  --radius-sm: 0.5rem;
+  --radius: 1rem;
+  --radius-lg: 1.5rem;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-surface: hsl(var(--surface));
+  --color-surface-muted: hsl(var(--surface-muted));
+  --color-border: hsl(var(--border));
+  --color-foreground: hsl(var(--foreground));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-success: hsl(var(--success));
+  --color-warning: hsl(var(--warning));
+  --color-destructive: hsl(var(--destructive));
+
+  --radius-sm: var(--radius-sm);
+  --radius: var(--radius);
+  --radius-lg: var(--radius-lg);
+
+  --font-sans: var(--font-geist-sans), Inter, system-ui, sans-serif;
+  --font-heading: var(--font-geist-sans), sans-serif;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glass panel utility */
+.glass-panel {
+  background: hsl(var(--glass-bg));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid hsl(var(--glass-border));
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+  border-radius: var(--radius-lg);
+}
+
+.shadow-soft {
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06);
+}
+
+.shadow-medium {
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.10);
+}

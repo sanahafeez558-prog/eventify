@@ -50,8 +50,8 @@ This file is the project's long-term memory. Antigravity must read it before sta
 
 _(Antigravity: append a dated entry here at the end of each completed phase.)_
 
-- `[ ]` Phase 0 — Connection & Foundation — not started
-- `[ ]` Phase 1 — Architecture & Database — not started
+- `[x]` Phase 0 — Connection & Foundation — completed 2026-09-26. Next.js 16 (App Router + Turbopack + Tailwind v4), Supabase project connected via MCP and .env.local, Git repository initialized and connected to GitHub (sanahafeez558-prog/eventify), shadcn/ui components (Button, Card, Badge, Toaster) and folder structure in place.
+- `[ ]` Phase 1 — Architecture & Database — in progress
 - `[ ]` Phase 2 — Design System — not started
 - `[ ]` Phase 3 — Public Pages — not started
 - `[ ]` Phase 4 — Authentication — not started
@@ -64,7 +64,7 @@ _(Antigravity: append a dated entry here at the end of each completed phase.)_
 
 ## 8. Current Status
 
-Project has not yet begun implementation as of this document's creation. This document set (PRD, Architecture, Task, Memory, Design, Rules, Agent, ANTIGRAVITY_PROMPT) is the complete pre-work; Phase 0 begins on first Antigravity run.
+Phase 0 completed cleanly. Phase 1 (Architecture & Database) is commencing with schema migrations against the live Supabase project.
 
 ## 9. Important Constraints
 

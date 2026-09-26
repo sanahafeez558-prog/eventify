@@ -19,27 +19,27 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
   Dependencies: T0.2.
   Acceptance: `git remote -v` shows a valid GitHub remote, or a clear note is left in Memory.md that this step needs manual completion.
 
-- [ ] **T0.4** Verify/establish Supabase project connection (existing project URL/keys present in env, or a new project must be created by the human operator).
+- [x] **T0.4** Verify/establish Supabase project connection (existing project URL/keys present in env, or a new project must be created by the human operator).
   Dependencies: T0.1.
   Acceptance: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are resolvable (present in `.env.local`, not committed).
 
-- [ ] **T0.5** Initialize Next.js project (TypeScript, App Router, Tailwind) if not already present. Do not overwrite an existing working `app/` directory.
+- [x] **T0.5** Initialize Next.js project (TypeScript, App Router, Tailwind) if not already present. Do not overwrite an existing working `app/` directory.
   Dependencies: T0.1.
   Acceptance: `npm run dev` boots a default Next.js page with no errors.
 
-- [ ] **T0.6** Install and configure shadcn/ui.
+- [x] **T0.6** Install and configure shadcn/ui.
   Dependencies: T0.5.
   Acceptance: `components/ui/button.tsx` (or equivalent) renders correctly on a scratch page.
 
-- [ ] **T0.7** Create `.env.example` documenting required variables; create local `.env.local` (gitignored) with real values.
+- [x] **T0.7** Create `.env.example` documenting required variables; create local `.env.local` (gitignored) with real values.
   Dependencies: T0.4.
   Acceptance: `.env.example` committed with empty values; `.env.local` present locally and ignored by Git.
 
-- [ ] **T0.8** Establish project folder structure per Architecture.md.
+- [x] **T0.8** Establish project folder structure per Architecture.md.
   Dependencies: T0.5.
   Acceptance: Folder tree matches Architecture.md §2 (adjustments logged in Memory.md if any).
 
-- [ ] **T0.9** Establish Git workflow: initial commit, `.gitignore` verified (node_modules, .env*, .next).
+- [x] **T0.9** Establish Git workflow: initial commit, `.gitignore` verified (node_modules, .env*, .next).
   Dependencies: T0.3, T0.8.
   Acceptance: First commit "Initial project setup" pushed to `main`.
 
