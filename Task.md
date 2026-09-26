@@ -141,13 +141,13 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
 
 ## PHASE 6 — Registration System
 
-- [ ] **T6.1** `RegisterButton` component — register/cancel with correct state per viewer.
+- [x] **T6.1** `RegisterButton` component — register/cancel with correct state per viewer.
   Dependencies: T3.3, Phase 4.
-- [ ] **T6.2** Duplicate-registration prevention verified against the unique constraint + upsert pattern.
+- [x] **T6.2** Duplicate-registration prevention verified against the unique constraint + upsert pattern.
   Dependencies: T6.1, T1.2.
-- [ ] **T6.3** Capacity enforcement verified against the DB trigger (attempt to exceed `max_attendees`).
+- [x] **T6.3** Capacity enforcement verified against the DB trigger (attempt to exceed `max_attendees`).
   Dependencies: T6.1, T1.1.
-- [ ] **T6.4** Seat counter live-updates after register/cancel.
+- [x] **T6.4** Seat counter live-updates after register/cancel.
   Dependencies: T6.1.
   Acceptance for phase: Register/cancel/re-register cycle works correctly and cannot be forced past capacity or duplicated.
 
@@ -155,11 +155,11 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
 
 ## PHASE 7 — Dashboard
 
-- [ ] **T7.1** Dashboard overview (`/dashboard`) — stat cards (total registrations, upcoming, past, created events), quick actions, recent registrations.
+- [x] **T7.1** Dashboard overview (`/dashboard`) — stat cards (total registrations, upcoming, past, created events), quick actions, recent registrations.
   Dependencies: Phase 4, Phase 5, Phase 6.
-- [ ] **T7.2** "My Events" page (`/dashboard/events`) — upcoming/past tabs, sourced from `registrations`.
+- [x] **T7.2** "My Events" page (`/dashboard/events`) — upcoming/past tabs, sourced from `registrations`.
   Dependencies: Phase 6.
-- [ ] **T7.3** Dashboard navigation/sidebar (Overview, My Events, Create Event, Manage Events, Profile, Logout).
+- [x] **T7.3** Dashboard navigation/sidebar (Overview, My Events, Create Event, Manage Events, Profile, Logout).
   Dependencies: Phase 2.
   Acceptance for phase: All dashboard numbers are computed from live queries and match manual verification against the database.
 
@@ -167,31 +167,31 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
 
 ## PHASE 8 — Polish
 
-- [ ] **T8.1** Responsive pass across all pages at 375px / 768px / 1280px.
-- [ ] **T8.2** Accessibility pass (labels, focus states, alt text, contrast check on glass surfaces).
-- [ ] **T8.3** Loading states (skeletons) on all data-fetching views.
-- [ ] **T8.4** Empty states on all list views (events, my events, manage events, registrations).
-- [ ] **T8.5** Error states on all data-fetching views (distinct from empty).
-- [ ] **T8.6** Subtle animation pass (hover states, page transitions) — restrained, per Design.md "avoid excessive animation."
+- [x] **T8.1** Responsive pass across all pages at 375px / 768px / 1280px.
+- [x] **T8.2** Accessibility pass (labels, focus states, alt text, contrast check on glass surfaces).
+- [x] **T8.3** Loading states (skeletons) on all data-fetching views.
+- [x] **T8.4** Empty states on all list views (events, my events, manage events, registrations).
+- [x] **T8.5** Error states on all data-fetching views (distinct from empty).
+- [x] **T8.6** Subtle animation pass (hover states, page transitions) — restrained, per Design.md "avoid excessive animation."
   Dependencies: Phases 3–7 complete.
 
 ---
 
 ## PHASE 9 — Deployment
 
-- [ ] **T9.1** Confirm production Supabase project settings (Auth email confirmation on/off decision documented in Memory.md).
-- [ ] **T9.2** Push repo to GitHub `main`.
-- [ ] **T9.3** Import project into Vercel; set environment variables.
-- [ ] **T9.4** Trigger production deploy; verify live URL loads Home and Events with real data.
+- [x] **T9.1** Confirm production Supabase project settings (Auth email confirmation on/off decision documented in Memory.md).
+- [x] **T9.2** Push repo to GitHub `main`.
+- [x] **T9.3** Import project into Vercel; set environment variables.
+- [x] **T9.4** Trigger production deploy; verify live URL loads Home and Events with real data.
   Dependencies: T9.1–T9.3.
 
 ---
 
 ## PHASE 10 — Final Validation
 
-- [ ] **T10.1** `npm run build` passes with zero errors.
-- [ ] **T10.2** `tsc --noEmit` (or `npm run build`'s type check) passes with zero errors.
-- [ ] **T10.3** ONE comprehensive Playwright browser test covering the full demo flow (Home → Events → Event Details → Signup → Login → Dashboard → Register → My Events → Create Event → Manage Event → Edit Event → Logout).
+- [x] **T10.1** `npm run build` passes with zero errors.
+- [x] **T10.2** `tsc --noEmit` (or `npm run build`'s type check) passes with zero errors.
+- [x] **T10.3** ONE comprehensive Playwright browser test covering the full demo flow (Home → Events → Event Details → Signup → Login → Dashboard → Register → My Events → Create Event → Manage Event → Edit Event → Logout).
   Dependencies: T10.1, T10.2, all prior phases.
-- [ ] **T10.4** Fix any critical issues found by T10.3 only (do not re-run the full suite repeatedly — targeted re-checks only for what was fixed).
-- [ ] **T10.5** Final commit "Final validation" and confirm production deployment reflects it.
+- [x] **T10.4** Fix any critical issues found by T10.3 only (do not re-run the full suite repeatedly — targeted re-checks only for what was fixed).
+- [x] **T10.5** Final commit "Final validation" and confirm production deployment reflects it.
