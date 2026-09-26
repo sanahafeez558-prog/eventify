@@ -15,9 +15,7 @@ import {
   MapPin,
   Users,
   ChevronLeft,
-  Share2,
   ShieldCheck,
-  CheckCircle2,
 } from "lucide-react"
 
 interface EventDetailPageProps {

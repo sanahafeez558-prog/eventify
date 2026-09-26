@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useTransition } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, X, SlidersHorizontal } from "lucide-react"
+import { Search, X } from "lucide-react"
 
 interface CategoryOption {
   id: string
@@ -18,7 +18,7 @@ interface EventFiltersProps {
 export function EventFilters({ categories }: EventFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   const currentSearch = searchParams.get("search") || ""
   const currentCategory = searchParams.get("category") || ""

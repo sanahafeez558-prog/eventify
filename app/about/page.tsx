@@ -1,10 +1,9 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ShieldCheck, Sparkles, Users, Calendar, ArrowRight, Database, Lock } from "lucide-react"
+import { ShieldCheck, Sparkles, Users, Calendar, ArrowRight, Lock } from "lucide-react"
 
 export const metadata = {
   title: "About Eventify — Discover. Connect. Experience.",

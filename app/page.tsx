@@ -8,8 +8,6 @@ import { createClient } from "@/lib/supabase/server"
 import {
   Sparkles,
   ArrowRight,
-  ShieldCheck,
-  CalendarCheck,
   Users2,
   Ticket,
   Laptop,

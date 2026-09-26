@@ -14,7 +14,6 @@ import {
   PlusCircle,
   LayoutDashboard,
   LogOut,
-  User as UserIcon,
   Compass,
 } from "lucide-react"
 

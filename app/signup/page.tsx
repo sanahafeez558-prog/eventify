@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { Sparkles, UserPlus, Loader2, ArrowRight } from "lucide-react"
+import { UserPlus, Loader2 } from "lucide-react"
 
 export default function SignupPage() {
   const router = useRouter()

@@ -9,7 +9,6 @@ import {
   MapPin,
   ExternalLink,
   XCircle,
-  CheckCircle2,
   Compass,
   Search,
   Loader2,
@@ -150,7 +149,7 @@ export function MyRegistrationsList({
         return;
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("registrations")
         .upsert(
           {

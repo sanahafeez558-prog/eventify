@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import { Save, Loader2, ShieldCheck, Mail, User } from "lucide-react"
+import { Save, Loader2, Mail } from "lucide-react"
 
 interface ProfileFormProps {
   profile: {

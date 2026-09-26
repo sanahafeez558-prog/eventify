@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
   Calendar,
-  Clock,
   MapPin,
   Users,
   Image as ImageIcon,
@@ -160,7 +159,7 @@ export function EventForm({
       };
 
       if (mode === "create") {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from("events")
           .insert({
             ...payload,

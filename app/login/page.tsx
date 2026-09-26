@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { LogIn, Loader2, ArrowRight } from "lucide-react"
+import { LogIn, Loader2 } from "lucide-react"
 
 function LoginForm() {
   const router = useRouter()
