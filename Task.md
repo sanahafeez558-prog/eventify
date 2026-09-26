@@ -15,7 +15,7 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
   Dependencies: T0.1.
   Acceptance: Known whether Git is initialized and whether a GitHub remote is already attached.
 
-- [~] **T0.3** Verify/establish GitHub connection (preserve existing remote if present; otherwise initialize repo and instruct on remote creation if Antigravity lacks the capability to create one itself).
+- [x] **T0.3** Verify/establish GitHub connection (preserve existing remote if present; otherwise initialize repo and instruct on remote creation if Antigravity lacks the capability to create one itself).
   Dependencies: T0.2.
   Acceptance: `git remote -v` shows a valid GitHub remote, or a clear note is left in Memory.md that this step needs manual completion.
 
