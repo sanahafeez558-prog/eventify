@@ -91,17 +91,17 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
 
 ## PHASE 3 — Public Pages
 
-- [ ] **T3.1** Home page (`/`) — hero, featured events (live query), categories grid, "How it works", CTA, footer.
+- [x] **T3.1** Home page (`/`) — hero, featured events (live query), categories grid, "How it works", CTA, footer.
   Dependencies: Phase 2, T1.6.
-- [ ] **T3.2** Events discovery page (`/events`) — search, filters, sort, grid, loading/empty/error states.
+- [x] **T3.2** Events discovery page (`/events`) — search, filters, sort, grid, loading/empty/error states.
   Dependencies: Phase 2, T1.6.
-- [ ] **T3.3** Event details page (`/events/[id]`) — full detail render, seat counter, register control (auth-gated).
+- [x] **T3.3** Event details page (`/events/[id]`) — full detail render, seat counter, register control (auth-gated).
   Dependencies: T3.2.
-- [ ] **T3.4** Categories page (`/categories`) — grid of categories linking to filtered `/events`.
+- [x] **T3.4** Categories page (`/categories`) — grid of categories linking to filtered `/events`.
   Dependencies: T1.6.
-- [ ] **T3.5** About page (`/about`) — static content, on-brand.
+- [x] **T3.5** About page (`/about`) — static content, on-brand.
   Dependencies: Phase 2.
-- [ ] **T3.6** Contact page (`/contact`) — form, inserts into `contact_messages`, success/error state.
+- [x] **T3.6** Contact page (`/contact`) — form, inserts into `contact_messages`, success/error state.
   Dependencies: T1.6.
   Acceptance for phase: All public pages render real Supabase data (where applicable) and are visually consistent with Design.md.
 
