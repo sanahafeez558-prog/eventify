@@ -109,15 +109,15 @@ Each task lists an ID, description, dependencies, and acceptance criteria. Antig
 
 ## PHASE 4 — Authentication
 
-- [ ] **T4.1** Signup page (`/signup`) — full name, email, password, confirm password; zod validation; calls `supabase.auth.signUp`.
+- [x] **T4.1** Signup page (`/signup`) — full name, email, password, confirm password; zod validation; calls `supabase.auth.signUp`.
   Dependencies: T1.6, Phase 2.
-- [ ] **T4.2** Login page (`/login`) — email, password; calls `supabase.auth.signInWithPassword`; honors `?redirect=`.
+- [x] **T4.2** Login page (`/login`) — email, password; calls `supabase.auth.signInWithPassword`; honors `?redirect=`.
   Dependencies: T1.6, Phase 2.
-- [ ] **T4.3** Logout action (navbar + dashboard sidebar) — `supabase.auth.signOut()`, redirect to `/`.
+- [x] **T4.3** Logout action (navbar + dashboard sidebar) — `supabase.auth.signOut()`, redirect to `/`.
   Dependencies: T4.2.
-- [ ] **T4.4** `middleware.ts` — session refresh + redirect unauthenticated users away from `/dashboard/*`.
+- [x] **T4.4** `middleware.ts` — session refresh + redirect unauthenticated users away from `/dashboard/*`.
   Dependencies: T4.1–T4.3.
-- [ ] **T4.5** Profile page (`/dashboard/profile`) — view/edit `full_name`, `avatar_url`.
+- [x] **T4.5** Profile page (`/dashboard/profile`) — view/edit `full_name`, `avatar_url`.
   Dependencies: T4.4.
   Acceptance for phase: A user can sign up, get redirected appropriately, land in dashboard, log out, and be blocked from `/dashboard` while logged out.
 

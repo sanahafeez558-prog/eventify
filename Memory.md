@@ -54,8 +54,8 @@ _(Antigravity: append a dated entry here at the end of each completed phase.)_
 - `[x]` Phase 1 — Architecture & Database — completed 2026-09-26. All 5 tables created in Supabase (profiles, categories, events, registrations, contact_messages), triggers set up (updated_at, handle_new_user, enforce_event_capacity), RLS enabled with strict owner/public policies, 8 categories seeded, TypeScript types generated in types/database.types.ts, and verified live against Supabase.
 - `[x]` Phase 2 — Design System — completed 2026-09-26. Design tokens and glassmorphism utilities implemented in globals.css, responsive Navbar with auth session listener and mobile menu, 4-column Footer, EventCard with seat availability and category badges, EventCardSkeleton, EmptyState, and shadcn primitives (Button, Input, Textarea, Select, Avatar, Dialog, Tabs, Toaster).
 - `[x]` Phase 3 — Public Pages — completed 2026-09-26. Home page (/), Events discovery page (/events) with keyword search, category pills, and sort order, Event detail page (/events/[id]) with live registrations join and RegisterButton, Categories directory (/categories), About page (/about), and Contact page (/contact) with zod validation and Supabase inserts.
-- `[ ]` Phase 4 — Authentication — in progress
-- `[ ]` Phase 5 — Event System — not started
+- `[x]` Phase 4 — Authentication — completed 2026-09-26. Signup (/signup) with Zod validation and auto-login, Login (/login) supporting ?redirect=, Logout action in navbar and sidebar, middleware session refresh and route protection for /dashboard/*, Dashboard layout and sidebar, Dashboard Overview (/dashboard) with stat cards and upcoming RSVPs, and Profile edit (/dashboard/profile).
+- `[ ]` Phase 5 — Event System — in progress
 - `[ ]` Phase 6 — Registration System — not started
 - `[ ]` Phase 7 — Dashboard — not started
 - `[ ]` Phase 8 — Polish — not started
@@ -64,7 +64,7 @@ _(Antigravity: append a dated entry here at the end of each completed phase.)_
 
 ## 8. Current Status
 
-Phases 0, 1, 2, and 3 completed cleanly. Phase 4 (Authentication: /signup, /login, session management, middleware route gating, and /dashboard/profile) is underway.
+Phases 0 through 4 completed cleanly. Phase 5 (Event System: EventForm, create-event, manage-events, edit-event, and delete-event with RLS enforcement) is now underway.
 
 ## 9. Important Constraints
 
