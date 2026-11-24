@@ -6,8 +6,6 @@
   <title>Eventify — Standalone Administrative Portal</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase JS Client CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
@@ -17,7 +15,6 @@
         extend: {
           colors: {
             brand: {
-              50: '#eef2ff',
               500: '#6366f1',
               600: '#4f46e5',
               700: '#4338ca',
@@ -37,9 +34,9 @@
       background-attachment: fixed;
     }
     .glass-card {
-      background: rgba(16, 22, 37, 0.85);
+      background: rgba(16, 22, 37, 0.88);
       backdrop-filter: blur(16px);
-      border: 1px solid rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.22);
     }
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -75,12 +72,12 @@
         <p class="text-xs text-slate-400">Sign in with authorized staff credentials</p>
       </div>
 
-      <div id="loginError" class="hidden p-3 rounded-xl bg-rose-950/70 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-400"></i>
+      <div id="loginError" class="hidden p-3 rounded-xl bg-rose-950/70 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-400 mt-0.5"></i>
         <span id="loginErrorText">Invalid credentials.</span>
       </div>
 
-      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+      <form id="loginForm" class="space-y-4">
         <div class="space-y-1.5">
           <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
             <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
@@ -112,18 +109,19 @@
         </div>
 
         <button
-          type="submit"
+          type="button"
           id="loginBtn"
-          class="w-full h-11 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-semibold text-xs tracking-wide rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 mt-2"
+          onclick="performLogin()"
+          class="w-full h-11 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-semibold text-xs tracking-wide rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 mt-2 cursor-pointer"
         >
           <i data-lucide="shield-check" class="w-4 h-4"></i>
-          <span>Authenticate Clearance</span>
+          <span id="loginBtnLabel">Authenticate Clearance</span>
         </button>
       </form>
 
       <div class="pt-2 text-center border-t border-slate-800/80">
         <p class="text-[11px] text-slate-500">
-          Connected to Live Supabase Postgres Instance
+          Connected directly to Supabase Postgres Cloud API
         </p>
       </div>
     </div>
@@ -512,86 +510,149 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <!-- JAVASCRIPT APPLICATION LOGIC (DIRECT NATIVE REST - ZERO EXTERNAL SDK BLOCKERS) -->
   <script>
-    // 1. SUPABASE CLIENT INITIALIZATION
     const SUPABASE_URL = "https://jmmhyppmoxopmpxhdxiz.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptbWh5cHBtb3hvcG1weGhkeGl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzOTYyMzcsImV4cCI6MjEwNTk3MjIzN30.MMqVISq1LCKaZPgo9yL-JkQEuY6sUaiM7bv6u37jYOw";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptbWh5cHBtb3hvcG1weGhkeGl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzOTYyMzcsImV4cCI6MjEwNTk3MjIzN30.MMqVISq1LCKaZPgo9yL-JkQEuY6sUaiM7bv6u37jYOw";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let currentSessionUser = null;
+    let authSession = null;
     let categoriesCache = [];
     let eventsCache = [];
 
-    // Initialize Lucide icons
-    document.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
-      checkExistingSession();
-    });
-
-    async function checkExistingSession() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session && session.user) {
-        verifyAdminAndEnter(session.user);
+    // Safe icon initializer
+    function refreshIcons() {
+      try {
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons();
+        }
+      } catch (e) {
+        console.warn("Lucide icons:", e);
       }
     }
 
-    // 2. AUTHENTICATION HANDLERS
-    async function handleLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById("adminEmail").value.trim();
-      const password = document.getElementById("adminPassword").value;
+    document.addEventListener("DOMContentLoaded", () => {
+      refreshIcons();
+      // Allow Enter key to trigger login
+      const emailInput = document.getElementById("adminEmail");
+      const passInput = document.getElementById("adminPassword");
+      if (emailInput && passInput) {
+        emailInput.addEventListener("keydown", (e) => { if (e.key === "Enter") performLogin(); });
+        passInput.addEventListener("keydown", (e) => { if (e.key === "Enter") performLogin(); });
+      }
+
+      // Check existing saved session in sessionStorage
+      const saved = sessionStorage.getItem("eventify_admin_session");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.access_token) {
+            authSession = parsed;
+            verifyProfileAndEnter(parsed.user.id, parsed.user.email);
+          }
+        } catch (e) {}
+      }
+    });
+
+    // Native API fetch helper
+    async function apiFetch(endpoint, options = {}) {
+      const headers = {
+        "apikey": SUPABASE_ANON_KEY,
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      };
+
+      if (authSession && authSession.access_token) {
+        headers["Authorization"] = `Bearer ${authSession.access_token}`;
+      } else {
+        headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
+      }
+
+      const res = await fetch(`${SUPABASE_URL}${endpoint}`, {
+        ...options,
+        headers
+      });
+
+      if (!res.ok) {
+        let errorMsg = `HTTP Error ${res.status}`;
+        try {
+          const errData = await res.json();
+          errorMsg = errData.message || errData.error_description || errData.error || errorMsg;
+        } catch (_) {}
+        throw new Error(errorMsg);
+      }
+
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return await res.json();
+      }
+      return null;
+    }
+
+    // 2. AUTHENTICATION
+    async function performLogin() {
+      const emailInput = document.getElementById("adminEmail");
+      const passInput = document.getElementById("adminPassword");
       const errorDiv = document.getElementById("loginError");
       const errorText = document.getElementById("loginErrorText");
+      const btnLabel = document.getElementById("loginBtnLabel");
       const btn = document.getElementById("loginBtn");
+
+      const email = emailInput.value.trim();
+      const password = passInput.value;
 
       errorDiv.classList.add("hidden");
       btn.disabled = true;
-      btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> Verifying Clearance...`;
+      btnLabel.textContent = "Verifying Clearance...";
 
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error || !data.user) {
+        // Direct REST Auth Call
+        const authData = await apiFetch("/auth/v1/token?grant_type=password", {
+          method: "POST",
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!authData || !authData.access_token || !authData.user) {
           throw new Error("Invalid administrative credentials.");
         }
-        await verifyAdminAndEnter(data.user);
+
+        authSession = authData;
+        sessionStorage.setItem("eventify_admin_session", JSON.stringify(authData));
+
+        await verifyProfileAndEnter(authData.user.id, authData.user.email);
       } catch (err) {
         errorDiv.classList.remove("hidden");
-        errorText.textContent = err.message || "Failed to authenticate administrator.";
+        errorText.textContent = err.message || "Failed to sign in. Please verify your credentials.";
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i><span>Authenticate Clearance</span>`;
-        lucide.createIcons();
+        btnLabel.textContent = "Authenticate Clearance";
+        refreshIcons();
       }
     }
 
-    async function verifyAdminAndEnter(user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role, email")
-        .eq("id", user.id)
-        .single();
+    async function verifyProfileAndEnter(userId, userEmail) {
+      // Query profiles table for role
+      const profiles = await apiFetch(`/rest/v1/profiles?id=eq.${userId}&select=role,email`);
+      const profile = profiles && profiles[0] ? profiles[0] : null;
 
       if (!profile || profile.role !== "admin") {
-        await supabase.auth.signOut();
-        throw new Error("Access Denied: Your account does not possess administrator clearance.");
+        sessionStorage.removeItem("eventify_admin_session");
+        authSession = null;
+        throw new Error("Access Denied: Account exists but does NOT possess administrator clearance.");
       }
 
-      currentSessionUser = user;
-      document.getElementById("activeAdminEmail").textContent = profile.email || user.email;
+      document.getElementById("activeAdminEmail").textContent = profile.email || userEmail;
       document.getElementById("loginSection").classList.add("hidden");
       document.getElementById("adminPortal").classList.remove("hidden");
-      lucide.createIcons();
+      refreshIcons();
       loadAllData();
     }
 
-    async function handleLogout() {
-      await supabase.auth.signOut();
-      currentSessionUser = null;
+    function handleLogout() {
+      sessionStorage.removeItem("eventify_admin_session");
+      authSession = null;
       document.getElementById("adminPortal").classList.add("hidden");
       document.getElementById("loginSection").classList.remove("hidden");
-      lucide.createIcons();
+      refreshIcons();
     }
 
     // 3. TAB NAVIGATION
@@ -608,12 +669,12 @@
         activeBtn.classList.add("bg-indigo-600", "text-white");
         activeBtn.classList.remove("text-slate-400");
       }
-      lucide.createIcons();
+      refreshIcons();
     }
 
-    // 4. DATA LOADING
+    // 4. DATA LOADER
     async function loadAllData() {
-      await Promise.all([
+      await Promise.allSettled([
         loadStats(),
         loadCategories(),
         loadEvents(),
@@ -621,60 +682,70 @@
         loadRSVPs(),
         loadMessages()
       ]);
-      lucide.createIcons();
+      refreshIcons();
     }
 
     async function loadStats() {
-      const [u, e, c, r] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("events").select("*", { count: "exact", head: true }),
-        supabase.from("categories").select("*", { count: "exact", head: true }),
-        supabase.from("registrations").select("*", { count: "exact", head: true }),
-      ]);
-      document.getElementById("statUsers").textContent = u.count || 0;
-      document.getElementById("statEvents").textContent = e.count || 0;
-      document.getElementById("statCategories").textContent = c.count || 0;
-      document.getElementById("statRSVPs").textContent = r.count || 0;
+      try {
+        const [u, e, c, r] = await Promise.all([
+          apiFetch("/rest/v1/profiles?select=id", { headers: { "Prefer": "count=exact" } }),
+          apiFetch("/rest/v1/events?select=id", { headers: { "Prefer": "count=exact" } }),
+          apiFetch("/rest/v1/categories?select=id", { headers: { "Prefer": "count=exact" } }),
+          apiFetch("/rest/v1/registrations?select=id", { headers: { "Prefer": "count=exact" } }),
+        ]);
+
+        document.getElementById("statUsers").textContent = Array.isArray(u) ? u.length : "--";
+        document.getElementById("statEvents").textContent = Array.isArray(e) ? e.length : "--";
+        document.getElementById("statCategories").textContent = Array.isArray(c) ? c.length : "--";
+        document.getElementById("statRSVPs").textContent = Array.isArray(r) ? r.length : "--";
+      } catch (err) {
+        console.error("Stats:", err);
+      }
     }
 
     // CATEGORIES
     async function loadCategories() {
-      const { data } = await supabase.from("categories").select("*, events(id)").order("name");
-      categoriesCache = data || [];
+      try {
+        const data = await apiFetch("/rest/v1/categories?select=*,events(id)&order=name.asc");
+        categoriesCache = data || [];
 
-      // Populate select in event modal
-      const catSelect = document.getElementById("evCategory");
-      catSelect.innerHTML = categoriesCache.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+        const catSelect = document.getElementById("evCategory");
+        if (catSelect) {
+          catSelect.innerHTML = categoriesCache.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+        }
 
-      const container = document.getElementById("categoriesContainer");
-      if (categoriesCache.length === 0) {
-        container.innerHTML = `<p class="col-span-full p-6 text-center text-slate-500">No categories found.</p>`;
-        return;
+        const container = document.getElementById("categoriesContainer");
+        if (categoriesCache.length === 0) {
+          container.innerHTML = `<p class="col-span-full p-6 text-center text-slate-500">No categories found.</p>`;
+          return;
+        }
+
+        container.innerHTML = categoriesCache.map(cat => `
+          <div class="p-5 rounded-2xl glass-card space-y-3 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                <span class="font-bold text-white text-sm">${cat.name}</span>
+                <span class="text-[10px] text-purple-400 font-mono">Icon: ${cat.icon || 'Sparkles'}</span>
+              </div>
+              <p class="text-xs text-slate-400 mt-2 line-clamp-2">${cat.description || 'No description provided.'}</p>
+            </div>
+            <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-[11px]">
+              <span class="text-slate-400">${cat.events ? cat.events.length : 0} Events linked</span>
+              <div class="flex items-center gap-1.5">
+                <button onclick="editCategory('${cat.id}')" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300">
+                  <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="p-1 rounded bg-rose-950/60 hover:bg-rose-900/60 text-rose-400">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join("");
+        refreshIcons();
+      } catch (err) {
+        console.error("Categories:", err);
       }
-
-      container.innerHTML = categoriesCache.map(cat => `
-        <div class="p-5 rounded-2xl glass-card space-y-3 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-              <span class="font-bold text-white text-sm">${cat.name}</span>
-              <span class="text-[10px] text-purple-400 font-mono">Icon: ${cat.icon || 'Sparkles'}</span>
-            </div>
-            <p class="text-xs text-slate-400 mt-2 line-clamp-2">${cat.description || 'No description provided.'}</p>
-          </div>
-          <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-[11px]">
-            <span class="text-slate-400">${cat.events ? cat.events.length : 0} Events</span>
-            <div class="flex items-center gap-1.5">
-              <button onclick="editCategory('${cat.id}')" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300">
-                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="p-1 rounded bg-rose-950/60 hover:bg-rose-900/60 text-rose-400">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `).join("");
-      lucide.createIcons();
     }
 
     function openAddCategoryModal() {
@@ -682,9 +753,8 @@
       document.getElementById("catName").value = "";
       document.getElementById("catDesc").value = "";
       document.getElementById("catIcon").value = "Sparkles";
-      document.getElementById("catModalTitle").innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-purple-400"></i><span>Add New Category</span>`;
       document.getElementById("categoryModal").classList.remove("hidden");
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function editCategory(id) {
@@ -694,9 +764,8 @@
       document.getElementById("catName").value = cat.name;
       document.getElementById("catDesc").value = cat.description || "";
       document.getElementById("catIcon").value = cat.icon || "Sparkles";
-      document.getElementById("catModalTitle").innerHTML = `<i data-lucide="edit-2" class="w-4 h-4 text-purple-400"></i><span>Edit Category</span>`;
       document.getElementById("categoryModal").classList.remove("hidden");
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function closeCategoryModal() {
@@ -707,70 +776,85 @@
       e.preventDefault();
       const id = document.getElementById("catId").value;
       const name = document.getElementById("catName").value.trim();
-      const description = document.getElementById("catDesc").value.trim();
-      const icon = document.getElementById("catIcon").value.trim();
+      const description = document.getElementById("catDesc").value.trim() || null;
+      const icon = document.getElementById("catIcon").value.trim() || "Sparkles";
 
-      if (id) {
-        await supabase.from("categories").update({ name, description, icon }).eq("id", id);
-      } else {
-        await supabase.from("categories").insert({ name, description, icon });
+      try {
+        if (id) {
+          await apiFetch(`/rest/v1/categories?id=eq.${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ name, description, icon })
+          });
+        } else {
+          await apiFetch(`/rest/v1/categories`, {
+            method: "POST",
+            body: JSON.stringify({ name, description, icon })
+          });
+        }
+        closeCategoryModal();
+        loadCategories();
+        loadStats();
+      } catch (err) {
+        alert("Failed to save category: " + err.message);
       }
-      closeCategoryModal();
-      loadCategories();
-      loadStats();
     }
 
     async function deleteCategory(id, name) {
-      if (!confirm(`Are you sure you want to delete category "${name}"?\nAny events using it will safely become Unassigned.`)) return;
-      await supabase.from("categories").delete().eq("id", id);
-      loadCategories();
-      loadStats();
+      if (!confirm(`Are you sure you want to delete category "${name}"?\nEvents in this category will safely become Unassigned.`)) return;
+      try {
+        await apiFetch(`/rest/v1/categories?id=eq.${id}`, { method: "DELETE" });
+        loadCategories();
+        loadStats();
+      } catch (err) {
+        alert("Failed to delete category: " + err.message);
+      }
     }
 
     // EVENTS
     async function loadEvents() {
-      const { data } = await supabase
-        .from("events")
-        .select("*, categories(name)")
-        .order("event_date", { ascending: false });
-      eventsCache = data || [];
+      try {
+        const data = await apiFetch("/rest/v1/events?select=*,categories(name)&order=event_date.desc");
+        eventsCache = data || [];
 
-      const tbody = document.getElementById("eventsTableBody");
-      if (eventsCache.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">No events found.</td></tr>`;
-        return;
+        const tbody = document.getElementById("eventsTableBody");
+        if (eventsCache.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">No events found.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = eventsCache.map(ev => `
+          <tr class="hover:bg-slate-900/60 transition-colors">
+            <td class="px-4 py-3 font-semibold text-white">${ev.title}</td>
+            <td class="px-4 py-3 text-slate-300">${ev.categories ? ev.categories.name : 'Unassigned'}</td>
+            <td class="px-4 py-3 text-slate-400 font-mono text-[11px]">${ev.event_date} (${ev.start_time.slice(0,5)})</td>
+            <td class="px-4 py-3 text-slate-400">${ev.location}</td>
+            <td class="px-4 py-3 font-mono text-indigo-300">${ev.max_attendees}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                ev.status === 'published' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30' : 'bg-slate-900 text-slate-400 border border-slate-800'
+              }">${ev.status}</span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <button onclick="togglePublish('${ev.id}', '${ev.status}')" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-indigo-300 mr-1" title="Toggle status">
+                <i data-lucide="${ev.status === 'published' ? 'eye-off' : 'eye'}" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteEvent('${ev.id}', '${ev.title.replace(/'/g, "\\'")}')" class="p-1 rounded bg-rose-950/60 hover:bg-rose-900/60 text-rose-400" title="Delete">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </td>
+          </tr>
+        `).join("");
+        refreshIcons();
+      } catch (err) {
+        console.error("Events:", err);
       }
-
-      tbody.innerHTML = eventsCache.map(ev => `
-        <tr class="hover:bg-slate-900/60 transition-colors">
-          <td class="px-4 py-3 font-semibold text-white">${ev.title}</td>
-          <td class="px-4 py-3 text-slate-300">${ev.categories ? ev.categories.name : 'Unassigned'}</td>
-          <td class="px-4 py-3 text-slate-400 font-mono text-[11px]">${ev.event_date} (${ev.start_time.slice(0,5)})</td>
-          <td class="px-4 py-3 text-slate-400">${ev.location}</td>
-          <td class="px-4 py-3 font-mono text-indigo-300">${ev.max_attendees}</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-              ev.status === 'published' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30' : 'bg-slate-900 text-slate-400 border border-slate-800'
-            }">${ev.status}</span>
-          </td>
-          <td class="px-4 py-3 text-right">
-            <button onclick="togglePublish('${ev.id}', '${ev.status}')" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-indigo-300 mr-1" title="Toggle status">
-              <i data-lucide="${ev.status === 'published' ? 'eye-off' : 'eye'}" class="w-3.5 h-3.5"></i>
-            </button>
-            <button onclick="deleteEvent('${ev.id}', '${ev.title}')" class="p-1 rounded bg-rose-950/60 hover:bg-rose-900/60 text-rose-400" title="Delete">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </td>
-        </tr>
-      `).join("");
-      lucide.createIcons();
     }
 
     function openAddEventModal() {
       const today = new Date().toISOString().split("T")[0];
       document.getElementById("evDate").value = today;
       document.getElementById("eventModal").classList.remove("hidden");
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function closeEventModal() {
@@ -779,7 +863,7 @@
 
     async function saveEvent(e) {
       e.preventDefault();
-      if (!currentSessionUser) return;
+      if (!authSession || !authSession.user) return;
 
       const title = document.getElementById("evTitle").value.trim();
       const category_id = document.getElementById("evCategory").value || null;
@@ -791,115 +875,144 @@
       const image_url = document.getElementById("evImage").value.trim() || null;
       const description = document.getElementById("evDesc").value.trim();
 
-      const { error } = await supabase.from("events").insert({
-        title,
-        category_id,
-        max_attendees,
-        event_date,
-        start_time,
-        end_time,
-        location,
-        image_url,
-        description,
-        organizer_id: currentSessionUser.id,
-        status: "published"
-      });
+      try {
+        await apiFetch("/rest/v1/events", {
+          method: "POST",
+          body: JSON.stringify({
+            title,
+            category_id,
+            max_attendees,
+            event_date,
+            start_time,
+            end_time,
+            location,
+            image_url,
+            description,
+            organizer_id: authSession.user.id,
+            status: "published"
+          })
+        });
 
-      if (error) {
-        alert("Failed to save event: " + error.message);
-        return;
+        closeEventModal();
+        loadEvents();
+        loadStats();
+      } catch (err) {
+        alert("Failed to create event: " + err.message);
       }
-      closeEventModal();
-      loadEvents();
-      loadStats();
     }
 
     async function togglePublish(id, currentStatus) {
       const nextStatus = currentStatus === "published" ? "cancelled" : "published";
-      await supabase.from("events").update({ status: nextStatus }).eq("id", id);
-      loadEvents();
+      try {
+        await apiFetch(`/rest/v1/events?id=eq.${id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: nextStatus })
+        });
+        loadEvents();
+      } catch (err) {
+        alert("Failed to toggle status: " + err.message);
+      }
     }
 
     async function deleteEvent(id, title) {
-      if (!confirm(`Are you sure you want to permanently delete event "${title}"?`)) return;
-      await supabase.from("events").delete().eq("id", id);
-      loadEvents();
-      loadStats();
+      if (!confirm(`Are you sure you want to delete event "${title}"?`)) return;
+      try {
+        await apiFetch(`/rest/v1/events?id=eq.${id}`, { method: "DELETE" });
+        loadEvents();
+        loadStats();
+      } catch (err) {
+        alert("Failed to delete event: " + err.message);
+      }
     }
 
     // USERS
     async function loadUsers() {
-      const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
-      const tbody = document.getElementById("usersTableBody");
-      tbody.innerHTML = (data || []).map(u => `
-        <tr class="hover:bg-slate-900/60 transition-colors">
-          <td class="px-4 py-3 font-semibold text-white">${u.full_name || 'N/A'}</td>
-          <td class="px-4 py-3 font-mono text-purple-300">${u.username || 'N/A'}</td>
-          <td class="px-4 py-3 text-slate-300">${u.email}</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-              u.role === 'admin' ? 'bg-purple-950/80 text-purple-300 border border-purple-500/30' : 'bg-slate-900 text-slate-400'
-            }">${u.role || 'attendee'}</span>
-          </td>
-          <td class="px-4 py-3 text-right">
-            ${u.role === 'admin' ? `
-              <button onclick="updateUserRole('${u.id}', 'attendee')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">Demote</button>
-            ` : `
-              <button onclick="updateUserRole('${u.id}', 'admin')" class="px-2 py-1 rounded bg-purple-900/60 hover:bg-purple-800/60 text-purple-300 text-[10px] font-semibold">Make Admin</button>
-            `}
-          </td>
-        </tr>
-      `).join("");
+      try {
+        const data = await apiFetch("/rest/v1/profiles?select=*&order=created_at.desc");
+        const tbody = document.getElementById("usersTableBody");
+        tbody.innerHTML = (data || []).map(u => `
+          <tr class="hover:bg-slate-900/60 transition-colors">
+            <td class="px-4 py-3 font-semibold text-white">${u.full_name || 'N/A'}</td>
+            <td class="px-4 py-3 font-mono text-purple-300">${u.username || 'N/A'}</td>
+            <td class="px-4 py-3 text-slate-300">${u.email}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                u.role === 'admin' ? 'bg-purple-950/80 text-purple-300 border border-purple-500/30' : 'bg-slate-900 text-slate-400'
+              }">${u.role || 'attendee'}</span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              ${u.role === 'admin' ? `
+                <button onclick="updateUserRole('${u.id}', 'attendee')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">Demote</button>
+              ` : `
+                <button onclick="updateUserRole('${u.id}', 'admin')" class="px-2 py-1 rounded bg-purple-900/60 hover:bg-purple-800/60 text-purple-300 text-[10px] font-semibold">Make Admin</button>
+              `}
+            </td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        console.error("Users:", err);
+      }
     }
 
     async function updateUserRole(userId, newRole) {
       if (!confirm(`Confirm changing user role to "${newRole}"?`)) return;
-      await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
-      loadUsers();
+      try {
+        await apiFetch(`/rest/v1/profiles?id=eq.${userId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ role: newRole })
+        });
+        loadUsers();
+      } catch (err) {
+        alert("Failed to update role: " + err.message);
+      }
     }
 
     // RSVPS
     async function loadRSVPs() {
-      const { data } = await supabase
-        .from("registrations")
-        .select("id, status, created_at, events(title), profiles(email)")
-        .order("created_at", { ascending: false });
-
-      const tbody = document.getElementById("rsvpsTableBody");
-      tbody.innerHTML = (data || []).map(r => `
-        <tr class="hover:bg-slate-900/60 transition-colors">
-          <td class="px-4 py-3 font-mono text-slate-500">${r.id.slice(0, 8)}...</td>
-          <td class="px-4 py-3 text-white font-medium">${r.events ? r.events.title : 'Deleted Event'}</td>
-          <td class="px-4 py-3 text-slate-300">${r.profiles ? r.profiles.email : 'Unknown'}</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
-              r.status === 'confirmed' ? 'text-emerald-400 bg-emerald-950/60' : 'text-slate-400 bg-slate-900'
-            }">${r.status}</span>
-          </td>
-          <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">${new Date(r.created_at).toLocaleDateString()}</td>
-        </tr>
-      `).join("");
+      try {
+        const data = await apiFetch("/rest/v1/registrations?select=id,status,created_at,events(title),profiles(email)&order=created_at.desc");
+        const tbody = document.getElementById("rsvpsTableBody");
+        tbody.innerHTML = (data || []).map(r => `
+          <tr class="hover:bg-slate-900/60 transition-colors">
+            <td class="px-4 py-3 font-mono text-slate-500">${r.id.slice(0, 8)}...</td>
+            <td class="px-4 py-3 text-white font-medium">${r.events ? r.events.title : 'Deleted Event'}</td>
+            <td class="px-4 py-3 text-slate-300">${r.profiles ? r.profiles.email : 'Unknown'}</td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                r.status === 'confirmed' ? 'text-emerald-400 bg-emerald-950/60' : 'text-slate-400 bg-slate-900'
+              }">${r.status}</span>
+            </td>
+            <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">${new Date(r.created_at).toLocaleDateString()}</td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        console.error("RSVPs:", err);
+      }
     }
 
-    // MESSAGES
+    // CONTACT MESSAGES
     async function loadMessages() {
-      const { data } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
-      const container = document.getElementById("messagesContainer");
-      if (!data || data.length === 0) {
-        container.innerHTML = `<p class="col-span-full p-6 text-center text-slate-500">No contact inquiries yet.</p>`;
-        return;
-      }
+      try {
+        const data = await apiFetch("/rest/v1/contact_messages?select=*&order=created_at.desc");
+        const container = document.getElementById("messagesContainer");
+        if (!data || data.length === 0) {
+          container.innerHTML = `<p class="col-span-full p-6 text-center text-slate-500">No contact inquiries yet.</p>`;
+          return;
+        }
 
-      container.innerHTML = data.map(m => `
-        <div class="p-5 rounded-2xl glass-card space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-white text-sm">${m.name}</span>
-            <span class="text-[10px] text-slate-500 font-mono">${new Date(m.created_at).toLocaleDateString()}</span>
+        container.innerHTML = data.map(m => `
+          <div class="p-5 rounded-2xl glass-card space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-sm">${m.name}</span>
+              <span class="text-[10px] text-slate-500 font-mono">${new Date(m.created_at).toLocaleDateString()}</span>
+            </div>
+            <p class="text-xs text-indigo-400 font-medium">${m.email} • Subject: ${m.subject}</p>
+            <p class="text-xs text-slate-300 pt-1 leading-relaxed">${m.message}</p>
           </div>
-          <p class="text-xs text-indigo-400 font-medium">${m.email} • Subject: ${m.subject}</p>
-          <p class="text-xs text-slate-300 pt-1 leading-relaxed">${m.message}</p>
-        </div>
-      `).join("");
+        `).join("");
+      } catch (err) {
+        console.error("Messages:", err);
+      }
     }
   </script>
 </body>
