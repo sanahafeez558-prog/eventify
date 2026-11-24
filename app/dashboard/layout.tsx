@@ -1,7 +1,16 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar"
 import { Navbar } from "@/components/layout/navbar"
+
+export const metadata: Metadata = {
+  title: "Dashboard — Eventify",
+  description: "Manage your registered events, RSVPs, and hosted workshops.",
+  icons: {
+    icon: "/logo.svg",
+  },
+}
 
 export default async function DashboardLayout({
   children,

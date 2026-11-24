@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/ui/avatar"
 import { RegisterButton } from "@/components/events/register-button"
+import { ZoomableDescription } from "@/components/events/zoomable-description"
 import { createClient } from "@/lib/supabase/server"
 import { formatDate, formatTime } from "@/lib/utils"
 import {
@@ -140,13 +141,8 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
               </div>
             </div>
 
-            {/* Event Description */}
-            <div className="space-y-4 pt-2">
-              <h3 className="text-lg font-semibold text-foreground">About This Event</h3>
-              <div className="prose prose-slate max-w-none text-muted-foreground text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                {event.description}
-              </div>
-            </div>
+            {/* Event Description with Zoom Controls */}
+            <ZoomableDescription content={event.description} />
 
             {/* Community Standards Box */}
             <div className="p-6 rounded-2xl bg-surface-muted/60 border border-border/80 flex items-start gap-3.5">

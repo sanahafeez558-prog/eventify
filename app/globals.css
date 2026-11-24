@@ -1,30 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  /* Base surfaces */
-  --background: 210 40% 98%;
-  --surface: 0 0% 100%;
-  --surface-muted: 210 30% 96%;
-  --border: 214 32% 91%;
+  /* Ultra-sleek Dark Mode surfaces */
+  --background: 224 45% 7%;      /* Deep Dark Midnight Blue #080c15 */
+  --surface: 224 40% 11%;         /* Dark Card Surface #101625 */
+  --surface-muted: 224 35% 15%;   /* Muted Dark Surface #161f33 */
+  --border: 224 30% 22%;          /* Dark Border */
 
   /* Text */
-  --foreground: 222 30% 14%;
-  --muted-foreground: 215 16% 45%;
+  --foreground: 210 40% 98%;      /* Crisp Light Text #f8fafc */
+  --muted-foreground: 215 20% 65%; /* Soft Muted Text #94a3b8 */
 
-  /* Brand accents */
-  --primary: 221 83% 63%;
+  /* Brand accents - Electric Indigo & Vibrant Violet Glow */
+  --primary: 245 95% 68%;
   --primary-foreground: 0 0% 100%;
-  --accent: 262 72% 68%;
+  --accent: 280 90% 70%;
   --accent-foreground: 0 0% 100%;
 
   /* Semantic */
-  --success: 152 58% 45%;
-  --warning: 38 92% 58%;
-  --destructive: 0 72% 58%;
+  --success: 152 75% 50%;
+  --warning: 38 95% 60%;
+  --destructive: 350 85% 65%;
 
-  /* Glass */
-  --glass-bg: 0 0% 100% / 0.65;
-  --glass-border: 0 0% 100% / 0.45;
+  /* Dark Glass */
+  --glass-bg: 224 40% 11% / 0.8;
+  --glass-border: 245 80% 65% / 0.25;
 
   --radius-sm: 0.5rem;
   --radius: 1rem;
@@ -55,27 +55,124 @@
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: #080c15;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.28) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.25) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.22) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.22) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: #f8fafc;
   font-family: var(--font-sans);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Glass panel utility */
+/* ========================================================
+   Accessibility Font Scaling Classes (A- / Default / A+)
+   ======================================================== */
+html.font-scale-sm {
+  font-size: 14px;
+}
+html.font-scale-md {
+  font-size: 16px;
+}
+html.font-scale-lg {
+  font-size: 18px;
+}
+html.font-scale-xl {
+  font-size: 20px;
+}
+
+/* ========================================================
+   Light Mode Overrides
+   ======================================================== */
+html.light body {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.08) 0px, transparent 50%);
+  color: #0f172a;
+}
+html.light .glass-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(203, 213, 225, 0.8);
+  color: #0f172a;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+html.light header.glass-card {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+/* Dynamic Animated Background Blob */
+@keyframes blob-bounce {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(40px, -50px) scale(1.15);
+  }
+  66% {
+    transform: translate(-30px, 30px) scale(0.92);
+  }
+}
+
+.animate-blob-slow {
+  animation: blob-bounce 14s infinite ease-in-out;
+}
+
+.animate-blob-reverse {
+  animation: blob-bounce 16s infinite ease-in-out reverse;
+}
+
+/* Glass panel utility for Dark Mode */
 .glass-panel {
-  background: hsl(var(--glass-bg));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid hsl(var(--glass-border));
-  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+  background: rgba(16, 22, 37, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(99, 102, 241, 0.15);
   border-radius: var(--radius-lg);
 }
 
+.glass-card {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 35px -5px rgba(129, 140, 248, 0.2);
+}
+
 .shadow-soft {
-  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .shadow-medium {
-  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.10);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 35px rgba(129, 140, 248, 0.35);
+}
+
+/* Colorful gradient text utility for Dark Mode */
+.gradient-text-primary {
+  background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-accent {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Styled dark select dropdown options */
+select option {
+  background-color: #0f172a;
+  color: #f8fafc;
 }
