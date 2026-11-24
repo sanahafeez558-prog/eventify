@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventify — Standalone Administrative Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #080c15;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.22) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.2) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.18) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+    .glass-card {
+      background: rgba(16, 22, 37, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #080c15; }
+    ::-webkit-scrollbar-thumb { background: #312e81; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4338ca; }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen font-sans flex flex-col antialiased">
+
+  <!-- ========================================== -->
+  <!-- 1. LOGIN SCREEN (Visible when logged out)  -->
+  <!-- ========================================== -->
+  <div id="loginSection" class="flex-1 flex flex-col justify-center items-center px-4 py-12 relative">
+    <div class="text-center mb-8 space-y-2">
+      <div class="inline-flex items-center gap-3">
+        <div class="p-2.5 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 shadow-lg">
+          <i data-lucide="shield-alert" class="w-7 h-7 text-white"></i>
+        </div>
+        <span class="font-extrabold text-3xl tracking-tight text-white">
+          Event<span class="text-indigo-400">ify</span>
+          <span class="ml-2 text-xs font-mono uppercase px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
+            Control Center
+          </span>
+        </span>
+      </div>
+      <p class="text-xs text-slate-400">Standalone Browser Administration Suite</p>
+    </div>
+
+    <div class="w-full max-w-md p-8 sm:p-10 rounded-3xl glass-card shadow-2xl space-y-6">
+      <div class="text-center space-y-1">
+        <h1 class="text-xl font-bold text-white">Administrator Clearance</h1>
+        <p class="text-xs text-slate-400">Sign in with authorized staff credentials</p>
+      </div>
+
+      <div id="loginError" class="hidden p-3 rounded-xl bg-rose-950/70 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-400"></i>
+        <span id="loginErrorText">Invalid credentials.</span>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
+            Admin Email Address
+          </label>
+          <input
+            id="adminEmail"
+            type="email"
+            required
+            value="admin@eventify.com"
+            placeholder="admin@eventify.com"
+            class="w-full h-11 px-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          />
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+            <i data-lucide="lock" class="w-3.5 h-3.5 text-purple-400"></i>
+            Password / Master Key
+          </label>
+          <input
+            id="adminPassword"
+            type="password"
+            required
+            value="Admin123!"
+            placeholder="••••••••••••"
+            class="w-full h-11 px-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          />
+        </div>
+
+        <button
+          type="submit"
+          id="loginBtn"
+          class="w-full h-11 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-semibold text-xs tracking-wide rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 mt-2"
+        >
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>Authenticate Clearance</span>
+        </button>
+      </form>
+
+      <div class="pt-2 text-center border-t border-slate-800/80">
+        <p class="text-[11px] text-slate-500">
+          Connected to Live Supabase Postgres Instance
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 2. ADMIN PORTAL (Visible after authentication) -->
+  <!-- ============================================== -->
+  <div id="adminPortal" class="hidden flex-1 flex flex-col min-h-screen">
+    <!-- Top Navigation Bar -->
+    <header class="h-16 px-6 border-b border-indigo-500/20 bg-slate-950/80 backdrop-blur-xl flex items-center justify-between sticky top-0 z-40">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600">
+          <i data-lucide="shield" class="w-5 h-5 text-white"></i>
+        </div>
+        <span class="font-extrabold text-lg text-white">
+          Event<span class="text-indigo-400">ify</span>
+          <span class="text-xs font-mono uppercase ml-2 text-indigo-400 font-normal">Standalone Portal</span>
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="activeAdminEmail" class="font-mono text-[11px]">admin@eventify.com</span>
+        </div>
+        <button
+          onclick="handleLogout()"
+          class="px-3.5 py-1.5 rounded-xl border border-slate-800 hover:bg-rose-950/50 hover:text-rose-300 text-slate-300 text-xs font-semibold transition-colors flex items-center gap-1.5"
+        >
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>Exit Portal</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="flex-1 flex flex-col md:flex-row">
+      <!-- Sidebar Tabs -->
+      <aside class="w-full md:w-64 bg-slate-950/90 border-r border-indigo-500/15 p-4 flex md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible">
+        <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 transition-all shrink-0">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Overview</span>
+        </button>
+        <button onclick="switchTab('categories')" id="tab-categories" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Categories CRUD</span>
+        </button>
+        <button onclick="switchTab('events')" id="tab-events" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>Manage Events</span>
+        </button>
+        <button onclick="switchTab('users')" id="tab-users" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>User Accounts</span>
+        </button>
+        <button onclick="switchTab('rsvps')" id="tab-rsvps" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0">
+          <i data-lucide="ticket" class="w-4 h-4"></i>
+          <span>Registrations / RSVPs</span>
+        </button>
+        <button onclick="switchTab('messages')" id="tab-messages" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900 transition-all shrink-0">
+          <i data-lucide="message-square" class="w-4 h-4"></i>
+          <span>Contact Inquiries</span>
+        </button>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full space-y-6">
+
+        <!-- 1. OVERVIEW VIEW -->
+        <div id="view-overview" class="tab-view space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white">Platform Health & Metrics</h2>
+              <p class="text-xs text-slate-400">Live synchronization with your Supabase database</p>
+            </div>
+            <button onclick="loadAllData()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-indigo-300 font-semibold flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Refresh Metrics</span>
+            </button>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-5 rounded-2xl glass-card space-y-2">
+              <div class="flex items-center justify-between text-indigo-400">
+                <span class="text-xs font-medium text-slate-400">Registered Users</span>
+                <i data-lucide="users" class="w-5 h-5"></i>
+              </div>
+              <div id="statUsers" class="text-2xl font-extrabold text-white">--</div>
+              <div class="text-[11px] text-slate-500">Live profiles in database</div>
+            </div>
+
+            <div class="p-5 rounded-2xl glass-card space-y-2">
+              <div class="flex items-center justify-between text-purple-400">
+                <span class="text-xs font-medium text-slate-400">Total Events</span>
+                <i data-lucide="calendar" class="w-5 h-5"></i>
+              </div>
+              <div id="statEvents" class="text-2xl font-extrabold text-white">--</div>
+              <div class="text-[11px] text-slate-500">Campus workshops & meetups</div>
+            </div>
+
+            <div class="p-5 rounded-2xl glass-card space-y-2">
+              <div class="flex items-center justify-between text-emerald-400">
+                <span class="text-xs font-medium text-slate-400">Active Categories</span>
+                <i data-lucide="layers" class="w-5 h-5"></i>
+              </div>
+              <div id="statCategories" class="text-2xl font-extrabold text-white">--</div>
+              <div class="text-[11px] text-slate-500">Curated topic niches</div>
+            </div>
+
+            <div class="p-5 rounded-2xl glass-card space-y-2">
+              <div class="flex items-center justify-between text-pink-400">
+                <span class="text-xs font-medium text-slate-400">Total RSVPs</span>
+                <i data-lucide="ticket" class="w-5 h-5"></i>
+              </div>
+              <div id="statRSVPs" class="text-2xl font-extrabold text-white">--</div>
+              <div class="text-[11px] text-slate-500">Confirmed seat bookings</div>
+            </div>
+          </div>
+
+          <!-- Quick Navigation Actions -->
+          <div class="p-6 rounded-3xl glass-card space-y-4">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
+              Administrative Fast Actions
+            </h3>
+            <div class="flex flex-wrap gap-2.5">
+              <button onclick="switchTab('categories'); openAddCategoryModal();" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>Add Category</span>
+              </button>
+              <button onclick="switchTab('events'); openAddEventModal();" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span>Create New Event</span>
+              </button>
+              <button onclick="switchTab('users')" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-semibold flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Inspect User Roles</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. CATEGORIES VIEW -->
+        <div id="view-categories" class="tab-view hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i data-lucide="layers" class="w-5 h-5 text-purple-400"></i>
+                Category Management
+              </h2>
+              <p class="text-xs text-slate-400">Create, edit, and safely delete topic categories with dependency protection</p>
+            </div>
+            <button onclick="openAddCategoryModal()" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>Add Category</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="categoriesContainer">
+            <!-- Dynamic Category Cards will render here -->
+          </div>
+        </div>
+
+        <!-- 3. EVENTS VIEW -->
+        <div id="view-events" class="tab-view hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i data-lucide="calendar" class="w-5 h-5 text-indigo-400"></i>
+                Manage Events & Workshops
+              </h2>
+              <p class="text-xs text-slate-400">Control event publishing, capacity, date, and schedules</p>
+            </div>
+            <button onclick="openAddEventModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md">
+              <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+              <span>Create Event</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl glass-card">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="px-4 py-3">Event Title</th>
+                  <th class="px-4 py-3">Category</th>
+                  <th class="px-4 py-3">Date & Time</th>
+                  <th class="px-4 py-3">Location</th>
+                  <th class="px-4 py-3">Seats</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="eventsTableBody" class="divide-y divide-slate-800/80">
+                <!-- Dynamic Events rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4. USERS VIEW -->
+        <div id="view-users" class="tab-view hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i data-lucide="users" class="w-5 h-5 text-blue-400"></i>
+                User Account Directory
+              </h2>
+              <p class="text-xs text-slate-400">Manage attendee roles, organizers, and administrative permissions</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl glass-card">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="px-4 py-3">Full Name</th>
+                  <th class="px-4 py-3">Username</th>
+                  <th class="px-4 py-3">Email</th>
+                  <th class="px-4 py-3">Role</th>
+                  <th class="px-4 py-3 text-right">Role Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody" class="divide-y divide-slate-800/80">
+                <!-- Dynamic Users rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5. RSVPS VIEW -->
+        <div id="view-rsvps" class="tab-view hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i data-lucide="ticket" class="w-5 h-5 text-emerald-400"></i>
+                Event Registrations & RSVPs
+              </h2>
+              <p class="text-xs text-slate-400">Live seat bookings enforced by PostgreSQL capacity constraints</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-2xl glass-card">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="px-4 py-3">Registration ID</th>
+                  <th class="px-4 py-3">Event Title</th>
+                  <th class="px-4 py-3">Attendee Email</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3">Registered Date</th>
+                </tr>
+              </thead>
+              <tbody id="rsvpsTableBody" class="divide-y divide-slate-800/80">
+                <!-- Dynamic RSVPs rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 6. CONTACT MESSAGES VIEW -->
+        <div id="view-messages" class="tab-view hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i data-lucide="message-square" class="w-5 h-5 text-amber-400"></i>
+                Inquiries & Contact Form Submissions
+              </h2>
+              <p class="text-xs text-slate-400">Messages sent from the public website contact page</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="messagesContainer">
+            <!-- Dynamic Messages -->
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD / EDIT CATEGORY                     -->
+  <!-- ============================================== -->
+  <div id="categoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="w-full max-w-md p-6 rounded-3xl glass-card space-y-4 animate-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="catModalTitle" class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-purple-400"></i>
+          <span>Add New Category</span>
+        </h3>
+        <button onclick="closeCategoryModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="categoryForm" onsubmit="saveCategory(event)" class="space-y-3.5">
+        <input type="hidden" id="catId" value="" />
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">Category Name</label>
+          <input id="catName" required placeholder="e.g. Artificial Intelligence" class="w-full h-10 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/50" />
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">Description</label>
+          <textarea id="catDesc" rows="3" placeholder="Description of topics covered..." class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/50"></textarea>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">Lucide Icon Marker</label>
+          <input id="catIcon" value="Sparkles" placeholder="e.g. Laptop, Briefcase, Trophy" class="w-full h-10 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100" />
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeCategoryModal()" class="px-4 py-2 rounded-xl border border-slate-800 text-slate-300 text-xs">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD EVENT                               -->
+  <!-- ============================================== -->
+  <div id="eventModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="w-full max-w-lg p-6 rounded-3xl glass-card space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4 text-indigo-400"></i>
+          <span>Create New Event</span>
+        </h3>
+        <button onclick="closeEventModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="eventForm" onsubmit="saveEvent(event)" class="space-y-3">
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">Event Title</label>
+          <input id="evTitle" required placeholder="e.g. Next.js 16 Full-Stack Summit" class="w-full h-10 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">Category</label>
+            <select id="evCategory" class="w-full h-10 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"></select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">Capacity (Seats)</label>
+            <input id="evCapacity" type="number" min="1" value="50" required class="w-full h-10 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">Date</label>
+            <input id="evDate" type="date" required class="w-full h-10 px-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">Start Time</label>
+            <input id="evStart" type="time" value="10:00" required class="w-full h-10 px-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs font-semibold text-slate-300">End Time</label>
+            <input id="evEnd" type="time" value="13:00" required class="w-full h-10 px-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100" />
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">Location / Venue</label>
+          <input id="evLocation" required placeholder="e.g. Campus Tech Auditorium B" class="w-full h-10 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">Banner Image URL</label>
+          <input id="evImage" placeholder="https://images.unsplash.com/..." class="w-full h-10 px-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-semibold text-slate-300">Description</label>
+          <textarea id="evDesc" rows="3" required placeholder="Full details regarding this event..." class="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-100"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEventModal()" class="px-4 py-2 rounded-xl border border-slate-800 text-slate-300 text-xs">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md">Publish Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    // 1. SUPABASE CLIENT INITIALIZATION
+    const SUPABASE_URL = "https://jmmhyppmoxopmpxhdxiz.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptbWh5cHBtb3hvcG1weGhkeGl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzOTYyMzcsImV4cCI6MjEwNTk3MjIzN30.MMqVISq1LCKaZPgo9yL-JkQEuY6sUaiM7bv6u37jYOw";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentSessionUser = null;
+    let categoriesCache = [];
+    let eventsCache = [];
+
+    // Initialize Lucide icons
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      checkExistingSession();
+    });
+
+    async function checkExistingSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.user) {
+        verifyAdminAndEnter(session.user);
+      }
+    }
+
+    // 2. AUTHENTICATION HANDLERS
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("adminEmail").value.trim();
+      const password = document.getElementById("adminPassword").value;
+      const errorDiv = document.getElementById("loginError");
+      const errorText = document.getElementById("loginErrorText");
+      const btn = document.getElementById("loginBtn");
+
+      errorDiv.classList.add("hidden");
+      btn.disabled = true;
+      btn.innerHTML = `<span class="animate-spin mr-2">⏳</span> Verifying Clearance...`;
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error || !data.user) {
+          throw new Error("Invalid administrative credentials.");
+        }
+        await verifyAdminAndEnter(data.user);
+      } catch (err) {
+        errorDiv.classList.remove("hidden");
+        errorText.textContent = err.message || "Failed to authenticate administrator.";
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="shield-check" class="w-4 h-4"></i><span>Authenticate Clearance</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    async function verifyAdminAndEnter(user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, email")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile || profile.role !== "admin") {
+        await supabase.auth.signOut();
+        throw new Error("Access Denied: Your account does not possess administrator clearance.");
+      }
+
+      currentSessionUser = user;
+      document.getElementById("activeAdminEmail").textContent = profile.email || user.email;
+      document.getElementById("loginSection").classList.add("hidden");
+      document.getElementById("adminPortal").classList.remove("hidden");
+      lucide.createIcons();
+      loadAllData();
+    }
+
+    async function handleLogout() {
+      await supabase.auth.signOut();
+      currentSessionUser = null;
+      document.getElementById("adminPortal").classList.add("hidden");
+      document.getElementById("loginSection").classList.remove("hidden");
+      lucide.createIcons();
+    }
+
+    // 3. TAB NAVIGATION
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-view").forEach(v => v.classList.add("hidden"));
+      document.getElementById(`view-${tabName}`).classList.remove("hidden");
+
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.remove("bg-indigo-600", "text-white");
+        btn.classList.add("text-slate-400");
+      });
+      const activeBtn = document.getElementById(`tab-${tabName}`);
+      if (activeBtn) {
+        activeBtn.classList.add("bg-indigo-600", "text-white");
+        activeBtn.classList.remove("text-slate-400");
+      }
+      lucide.createIcons();
+    }
+
+    // 4. DATA LOADING
+    async function loadAllData() {
+      await Promise.all([
+        loadStats(),
+        loadCategories(),
+        loadEvents(),
+        loadUsers(),
+        loadRSVPs(),
+        loadMessages()
+      ]);
+      lucide.createIcons();
+    }
+
+    async function loadStats() {
+      const [u, e, c, r] = await Promise.all([
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase.from("events").select("*", { count: "exact", head: true }),
+        supabase.from("categories").select("*", { count: "exact", head: true }),
+        supabase.from("registrations").select("*", { count: "exact", head: true }),
+      ]);
+      document.getElementById("statUsers").textContent = u.count || 0;
+      document.getElementById("statEvents").textContent = e.count || 0;
+      document.getElementById("statCategories").textContent = c.count || 0;
+      document.getElementById("statRSVPs").textContent = r.count || 0;
+    }
+
+    // CATEGORIES
+    async function loadCategories() {
+      const { data } = await supabase.from("categories").select("*, events(id)").order("name");
+      categoriesCache = data || [];
+
+      // Populate select in event modal
+      const catSelect = document.getElementById("evCategory");
+      catSelect.innerHTML = categoriesCache.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
+
+      const container = document.getElementById("categoriesContainer");
+      if (categoriesCache.length === 0) {
+        container.innerHTML = `<p class="col-span-full p-6 text-center text-slate-500">No categories found.</p>`;
+        return;
+      }
+
+      container.innerHTML = categoriesCache.map(cat => `
+        <div class="p-5 rounded-2xl glass-card space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <span class="font-bold text-white text-sm">${cat.name}</span>
+              <span class="text-[10px] text-purple-400 font-mono">Icon: ${cat.icon || 'Sparkles'}</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 line-clamp-2">${cat.description || 'No description provided.'}</p>
+          </div>
+          <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-[11px]">
+            <span class="text-slate-400">${cat.events ? cat.events.length : 0} Events</span>
+            <div class="flex items-center gap-1.5">
+              <button onclick="editCategory('${cat.id}')" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300">
+                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteCategory('${cat.id}', '${cat.name}')" class="p-1 rounded bg-rose-950/60 hover:bg-rose-900/60 text-rose-400">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+      lucide.createIcons();
+    }
+
+    function openAddCategoryModal() {
+      document.getElementById("catId").value = "";
+      document.getElementById("catName").value = "";
+      document.getElementById("catDesc").value = "";
+      document.getElementById("catIcon").value = "Sparkles";
+      document.getElementById("catModalTitle").innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-purple-400"></i><span>Add New Category</span>`;
+      document.getElementById("categoryModal").classList.remove("hidden");
+      lucide.createIcons();
+    }
+
+    function editCategory(id) {
+      const cat = categoriesCache.find(c => c.id === id);
+      if (!cat) return;
+      document.getElementById("catId").value = cat.id;
+      document.getElementById("catName").value = cat.name;
+      document.getElementById("catDesc").value = cat.description || "";
+      document.getElementById("catIcon").value = cat.icon || "Sparkles";
+      document.getElementById("catModalTitle").innerHTML = `<i data-lucide="edit-2" class="w-4 h-4 text-purple-400"></i><span>Edit Category</span>`;
+      document.getElementById("categoryModal").classList.remove("hidden");
+      lucide.createIcons();
+    }
+
+    function closeCategoryModal() {
+      document.getElementById("categoryModal").classList.add("hidden");
+    }
+
+    async function saveCategory(e) {
+      e.preventDefault();
+      const id = document.getElementById("catId").value;
+      const name = document.getElementById("catName").value.trim();
+      const description = document.getElementById("catDesc").value.trim();
+      const icon = document.getElementById("catIcon").value.trim();
+
+      if (id) {
+        await supabase.from("categories").update({ name, description, icon }).eq("id", id);
+      } else {
+        await supabase.from("categories").insert({ name, description, icon });
+      }
+      closeCategoryModal();
+      loadCategories();
+      loadStats();
+    }
+
+    async function deleteCategory(id, name) {
+      if (!confirm(`Are you sure you want to delete category "${name}"?\nAny events using it will safely become Unassigned.`)) return;
+      await supabase.from("categories").delete().eq("id", id);
+      loadCategories();
+      loadStats();
+    }
+
+    // EVENTS
+    async function loadEvents() {
+      const { data } = await supabase
+        .from("events")
+        .select("*, categories(name)")
+        .order("event_date", { ascending: false });
+      eventsCache = data || [];
+
+      const tbody = document.getElementById("eventsTableBody");
+      if (eventsCache.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">No events found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = eventsCache.map(ev => `
+        <tr class="hover:bg-slate-900/60 transition-colors">
+          <td class="px-4 py-3 font-semibold text-white">${ev.title}</td>
+          <td class="px-4 py-3 text-slate-300">${ev.categories ? ev.categories.name : 'Unassigned'}</td>
+          <td class="px-4 py-3 text-slate-400 font-mono text-[11px]">${ev.event_date} (${ev.start_time.slice(0,5)})</td>
+          <td class="px-4 py-3 text-slate-400">${ev.location}</td>
+          <td class="px-4 py-3 font-mono text-indigo-300">${ev.max_attendees}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+              ev.status === 'published' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30' : 'bg-slate-900 text-slate-400 border border-slate-800'
+            }">${ev.status}</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="togglePublish('${ev.id}', '${ev.status}')" class="p-1 rounded bg-slate-900 hover:bg-slate-800 text-indigo-300 mr-1" title="Toggle status">
+              <i data-lucide="${ev.status === 'published' ? 'eye-off' : 'eye'}" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="deleteEvent('${ev.id}', '${ev.title}')" class="p-1 rounded bg-rose-950/60 hover:bg-rose-900/60 text-rose-400" title="Delete">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        </tr>
+      `).join("");
+      lucide.createIcons();
+    }
+
+    function openAddEventModal() {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("evDate").value = today;
+      document.getElementById("eventModal").classList.remove("hidden");
+      lucide.createIcons();
+    }
+
+    function closeEventModal() {
+      document.getElementById("eventModal").classList.add("hidden");
+    }
+
+    async function saveEvent(e) {
+      e.preventDefault();
+      if (!currentSessionUser) return;
+
+      const title = document.getElementById("evTitle").value.trim();
+      const category_id = document.getElementById("evCategory").value || null;
+      const max_attendees = parseInt(document.getElementById("evCapacity").value, 10);
+      const event_date = document.getElementById("evDate").value;
+      const start_time = document.getElementById("evStart").value;
+      const end_time = document.getElementById("evEnd").value;
+      const location = document.getElementById("evLocation").value.trim();
+      const image_url = document.getElementById("evImage").value.trim() || null;
+      const description = document.getElementById("evDesc").value.trim();
+
+      const { error } = await supabase.from("events").insert({
+        title,
+        category_id,
+        max_attendees,
+        event_date,
+        start_time,
+        end_time,
+        location,
+        image_url,
+        description,
+        organizer_id: currentSessionUser.id,
+        status: "published"
+      });
+
+      if (error) {
+        alert("Failed to save event: " + error.message);
+        return;
+      }
+      closeEventModal();
+      loadEvents();
+      loadStats();
+    }
+
+    async function togglePublish(id, currentStatus) {
+      const nextStatus = currentStatus === "published" ? "cancelled" : "published";
+      await supabase.from("events").update({ status: nextStatus }).eq("id", id);
+      loadEvents();
+    }
+
+    async function deleteEvent(id, title) {
+      if (!confirm(`Are you sure you want to permanently delete event "${title}"?`)) return;
+      await supabase.from("events").delete().eq("id", id);
+      loadEvents();
+      loadStats();
+    }
+
+    // USERS
+    async function loadUsers() {
+      const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+      const tbody = document.getElementById("usersTableBody");
+      tbody.innerHTML = (data || []).map(u => `
+        <tr class="hover:bg-slate-900/60 transition-colors">
+          <td class="px-4 py-3 font-semibold text-white">${u.full_name || 'N/A'}</td>
+          <td class="px-4 py-3 font-mono text-purple-300">${u.username || 'N/A'}</td>
+          <td class="px-4 py-3 text-slate-300">${u.email}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+              u.role === 'admin' ? 'bg-purple-950/80 text-purple-300 border border-purple-500/30' : 'bg-slate-900 text-slate-400'
+            }">${u.role || 'attendee'}</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            ${u.role === 'admin' ? `
+              <button onclick="updateUserRole('${u.id}', 'attendee')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]">Demote</button>
+            ` : `
+              <button onclick="updateUserRole('${u.id}', 'admin')" class="px-2 py-1 rounded bg-purple-900/60 hover:bg-purple-800/60 text-purple-300 text-[10px] font-semibold">Make Admin</button>
+            `}
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    async function updateUserRole(userId, newRole) {
+      if (!confirm(`Confirm changing user role to "${newRole}"?`)) return;
+      await supabase.from("profiles").update({ role: newRole }).eq("id", userId);
+      loadUsers();
+    }
+
+    // RSVPS
+    async function loadRSVPs() {
+      const { data } = await supabase
+        .from("registrations")
+        .select("id, status, created_at, events(title), profiles(email)")
+        .order("created_at", { ascending: false });
+
+      const tbody = document.getElementById("rsvpsTableBody");
+      tbody.innerHTML = (data || []).map(r => `
+        <tr class="hover:bg-slate-900/60 transition-colors">
+          <td class="px-4 py-3 font-mono text-slate-500">${r.id.slice(0, 8)}...</td>
+          <td class="px-4 py-3 text-white font-medium">${r.events ? r.events.title : 'Deleted Event'}</td>
+          <td class="px-4 py-3 text-slate-300">${r.profiles ? r.profiles.email : 'Unknown'}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+              r.status === 'confirmed' ? 'text-emerald-400 bg-emerald-950/60' : 'text-slate-400 bg-slate-900'
+            }">${r.status}</span>
+          </td>
+          <td class="px-4 py-3 font-mono text-slate-500 text-[11px]">${new Date(r.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join("");
+    }
+
+    // MESSAGES
+    async function loadMessages() {
+      const { data } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
+      const container = document.getElementById("messagesContainer");
+      if (!data || data.length === 0) {
+        container.innerHTML = `<p class="col-span-full p-6 text-center text-slate-500">No contact inquiries yet.</p>`;
+        return;
+      }
+
+      container.innerHTML = data.map(m => `
+        <div class="p-5 rounded-2xl glass-card space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-sm">${m.name}</span>
+            <span class="text-[10px] text-slate-500 font-mono">${new Date(m.created_at).toLocaleDateString()}</span>
+          </div>
+          <p class="text-xs text-indigo-400 font-medium">${m.email} • Subject: ${m.subject}</p>
+          <p class="text-xs text-slate-300 pt-1 leading-relaxed">${m.message}</p>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>
